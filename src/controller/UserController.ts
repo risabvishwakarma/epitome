@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import User from '../models/UserModel';
 import jwt from 'jsonwebtoken'; // Import jwt
-import crypto from 'crypto'; // Import crypto module for generating tokens
+import * as crypto from 'crypto'; // Built-in Node.js module
 import nodemailer from 'nodemailer'; // Import nodemailer for sending emails
 class UserController {
     public async profile(req: Request, res: Response): Promise<void> {
