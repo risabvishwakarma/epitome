@@ -15,7 +15,7 @@ class UserController {
     public async registerUser(req: Request, res: Response): Promise<void> {
         try {
             console.log(req.body)
-            const { name, email, password, role,haveSubscription,subscriptionExpiry } = req.body;
+            const { name, email, password, role } = req.body;
 
             // Check if user already exists
             const existingUser = await User.findOne({ email });
@@ -25,14 +25,14 @@ class UserController {
             }
 
             // Create new user
-            const newUser = new User({ name, email, password, role, haveSubscription, subscriptionExpiry });
+            const newUser = new User({ name, email, password, role });
 
             console.log("new user ",newUser)
 
             const savedUser = await newUser.save();
 
             // Respond with user data
-            res.status(201).json({ id: savedUser._id, name: savedUser.name, email: savedUser.email, role: savedUser.role ,haveSubscription: savedUser.haveSubscription, subscriptionExpiry:savedUser.subscriptionExpiry  });
+            res.status(201).json({ id: savedUser._id, name: savedUser.name, email: savedUser.email, role: savedUser.role   });
         } catch (error) {
             res.status(500).json({ message: 'Error registering user' });
         }

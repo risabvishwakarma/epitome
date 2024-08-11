@@ -11,18 +11,15 @@
   },
   "author": "Risab Vishwakarma",
   "license": "ISC",
-  "devDependencies": {
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.7",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
+    "@types/mongoose": "^5.11.96",
     "@types/node": "^22.2.0",
     "@types/nodemailer": "^6.4.15",
-    "typescript": "^5.5.4"
-  },
-  "dependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/mongoose": "^5.11.96",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "crypto": "^1.0.1",
@@ -33,6 +30,7 @@
     "import": "^0.0.6",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.2",
-    "nodemailer": "^6.9.14"
+    "nodemailer": "^6.9.14",
+    "typescript": "^5.5.4"
   }
 }
