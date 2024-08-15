@@ -5,6 +5,8 @@ import authRoutes from './router/UserRouter'; // Import the router
 
 import cookieParser from 'cookie-parser'; // Correct import
 
+import cors from 'cors'
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -14,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 // Connect to MongoDB
 connectDB();
-
+app.use(cors());
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
