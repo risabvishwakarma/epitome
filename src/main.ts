@@ -25,9 +25,9 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes); // Prefix routes with /api/auth
 
 // Basic route
-// app.get('/', (req, res) => {
-//     res.send('Hello, MongoDB with TypeScript!');
-// });
+app.get('/kaisan-waa', (req, res) => {
+    res.send('Baki sab theek, Bass chall rha hai🙌');
+});
 
 // Start the server
 app.listen(PORT, () => {
