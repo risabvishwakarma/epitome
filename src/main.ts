@@ -6,6 +6,7 @@ import authRoutes from './router/UserRouter'; // Import the router
 import cookieParser from 'cookie-parser'; // Correct import
 
 import cors from 'cors'
+import { UserRegistrationMapSingleton } from './application/RegistrationTemp';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -28,6 +29,8 @@ app.use('/api/auth', authRoutes); // Prefix routes with /api/auth
 app.get('/kaisan-waa', (req, res) => {
     res.send('Baki sab theek, Bass chall rha hai🙌');
 });
+
+
 
 // Start the server
 app.listen(PORT, () => {

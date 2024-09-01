@@ -9,7 +9,8 @@ const router = express.Router();
 const userController = new UserController();
 
 // Authentication routes
-router.post('/register', userController.registerUser);
+router.post('/register', userController.verifyEmail);
+router.post('/verification',userController.registerUser)
 router.post('/login', userController.loginUser);
 router.post('/logout', userController.logoutUser);
 router.post('/forgot-password', userController.forgotPassword);

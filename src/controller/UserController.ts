@@ -3,6 +3,10 @@ import User from '../models/UserModel';
 import jwt from 'jsonwebtoken'; // Import jwt
 import * as crypto from 'crypto'; // Built-in Node.js module
 import nodemailer from 'nodemailer'; // Import nodemailer for sending emails
+import { UserRegistrationMapSingleton } from '../application/RegistrationTemp';
+import { UserRegistrationData } from '../models/UserRegistrationData';
+import UserService from '../util/Mail';
+
 class UserController {
     public async profile(req: Request, res: Response): Promise<void> {
         const user = (req as any).user;
@@ -15,7 +19,19 @@ class UserController {
     public async registerUser(req: Request, res: Response): Promise<void> {
         try {
             console.log(req.body)
-            const { name, email, password, role } = req.body;
+          
+            const { session, otp } = req.body;
+
+            const user: UserRegistrationData | undefined  = UserRegistrationMapSingleton.getInstance().find(session)
+            if(user==undefined){
+                res.status(400).json({ message: 'session expired' });
+                return;
+            }
+
+              const { name, email, password, role } = user;
+
+              console.log(email)
+
 
             // Check if user already exists
             const existingUser = await User.findOne({ email });
@@ -31,12 +47,76 @@ class UserController {
 
             const savedUser = await newUser.save();
 
+
             // Respond with user data
             res.status(201).json({ id: savedUser._id, name: savedUser.name, email: savedUser.email, role: savedUser.role   });
         } catch (error) {
-            res.status(500).json({ message: 'Error registering user' });
+            res.status(500).json({ message: 'Error registering user'+error });
         }
     }
+
+    public async verifyEmail(req: Request, res: Response): Promise<void> {
+        try {
+            console.log(req.body)
+            const { name, email, password, role } = req.body
+            if(email==null){
+                res.status(400).json({ message: 'please enter email id' });
+                return;
+            }
+
+            // Check if user already exists
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                res.status(400).json({ message: 'User already exists' });
+                return;
+            }
+
+            // Create new user
+            // const newUser = new User({ name, email, password, role });
+
+            // console.log("new user ",newUser)
+
+            const otp = crypto.randomInt(1000,9999).toString()
+
+            console.log(otp)
+    
+            const session =crypto.randomBytes(20).toString('hex');
+            console.log(session)
+
+            
+             UserRegistrationMapSingleton.getInstance().save(session,new UserRegistrationData(email,otp,session,password,name,role))
+            
+             console.log(UserRegistrationMapSingleton.getInstance().getSize())
+             const txt = `Dear User,
+
+             Thank you for registering with us. To complete your registration and verify your email address, please use the following One-Time Password (OTP):
+             
+             OTP: ${otp}
+             
+             Please enter this OTP in the verification page to verify your email address.
+             
+             This OTP is valid for the next 10 minutes. If you did not request this verification, please ignore this email.
+             
+             Thank you,
+             Your Company Name
+             `;
+             
+            
+            new UserService().sendEmail(email,txt,"Verify Email")
+
+            // Respond with user data
+            res.status(200).json({ session:session, msg:"enter otp sent to your email"});
+        } catch (error) {
+        
+             // Check if the error is an instance of Error
+    const errorMessage = error instanceof Error 
+    ? `${error.message}\nStack: ${error.stack}` 
+    : String(error);
+            res.status(500).json({ message: 'Error registering user'+error });
+        }
+    }
+
+
 
     public async loginUser(req: Request, res: Response): Promise<void> {
         try {
@@ -99,31 +179,23 @@ class UserController {
             user.resetPasswordToken = resetToken;
             user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
             await user.save();
-    
-            // Send reset token to user via email
-            const transporter = nodemailer.createTransport({
-                service: 'Gmail', // or another email service
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS,
-                },
-            });
-    
+
             const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-            const mailOptions = {
-                to: email,
-                from: process.env.EMAIL_USER,
-                subject: 'Password Reset',
-                text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease make a PUT request to the following URL to reset your password:\n\n${resetURL}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`,
-            };
+
+            const txt=`You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease make a PUT request to the following URL to reset your password:\n\n${resetURL}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`
+
+            new UserService().sendEmail(email,txt,"Password Reset")
     
-            await transporter.sendMail(mailOptions);
+  
     
             res.status(200).json({ message: 'Password reset token sent to email' });
         } catch (error) {
             res.status(500).json({ message: 'Error processing request', error: error });
         }
     }
+
+
+    
     
 
     public async resetPassword(req: Request, res: Response): Promise<void> {
